@@ -28,92 +28,122 @@ def construct_grid(width, height, number)
 	return grid
 
 end
-
-def get_horizontals(grid)
-
-	largest_horizontal = 0
-
+def pretty_print(grid)
 	grid.each do |subarray|
-		start_index = 0
-		end_index = 3
-
-		largest = 0
-
-		while end_index < subarray.length
-			quartet = subarray[start_index,end_index]
-
-			product = 1
-
-			quartet.each do |number|
-				product*=number
+		subarray.each do |value|
+			if value.to_s.length == 1
+				print "0#{value} "
+			else
+				print "#{value} "
 			end
-
-			if product > largest
-				largest = product
-			end
-
-			start_index+=1
-			end_index+=1
 		end
-
-		if largest_horizontal < largest
-			largest_horizontal = largest
-		end
-	end
-	puts largest_horizontal
-end
-
-def get_verticals(grid)
-
-
-	grid.each_with_index do |subgrid, index|
-		subgrid
+		puts
 	end
 end
 
-def get_l_diagonals(grid)
-end
+def parse_array(array)
+	# Code goes here
+	start_index = 0
+	end_index = 3
 
-def get_r_diagonals(grid)
-end
+	largest = 0
 
-def parse_line(line)
-	l = line.to_s.length
-	beginning = 0
-	ending = 3
-	largest = 1
+	while end_index < array.length
 
-	while ending < l
+		temporary_array = array[start_index, end_index]
+
 		product = 1
-		as_string = line.to_s
-		(beginning..ending).each do |number|
-			factor = as_string[number].to_i
-			product*=factor
+
+		temporary_array.each do |value|
+			product *= value
 		end
 
 		if product > largest
 			largest = product
 		end
 
-		beginning+=1
-		ending+=1
-		
+		end_index+=1
+		start_index+=1
 	end
+
 	return largest
 end
 
-def pretty_print(grid)
+def get_horizontals(grid)
+
+	largest_horizontal = 0
 
 	grid.each do |subarray|
-		subarray.each do |value|
-			print "#{value} "
+		subarray_value = parse_array subarray
+
+		if largest_horizontal < subarray_value
+			largest_horizontal = subarray_value
 		end
-		puts
+	end
+	return largest_horizontal
+end
+
+def get_verticals(grid)
+
+	largest_vertical = 0
+
+	index = 0
+
+	while index < grid.length
+		staging_array = []
+
+		grid.each do |subgrid|
+			staging_array << subgrid[index]
+		end
+
+		result = parse_array staging_array
+
+		if result > largest_vertical
+			largest_vertical = result
+		end
+
+		index += 1
+	end
+	return largest_vertical
+end
+
+def get_l_diagonals(grid)
+	index = 0
+
+	staging_array = []
+
+	while index < grid.length
+		# print "#{grid[index][index]} "
+		staging_array << grid[index][index]
+		index+=1
 	end
 
+	return parse_array staging_array
 
 end
 
+def get_r_diagonals(grid)
+	index = grid.length-1
 
+	staging_array = []
 
-get_horizontals construct_grid 20, 20, full_number
+	while index > 0
+		# print "#{grid[index][index]} "
+		staging_array << grid[index][index]
+		index-=1
+	end
+
+	return parse_array staging_array
+end
+
+#METHODS ABOVE, PROCEDURE BELOW#
+the_grid = construct_grid 20, 20, full_number
+values_array = []
+
+values_array.push(get_horizontals the_grid)
+values_array.push(get_verticals the_grid)
+values_array.push(get_r_diagonals the_grid)
+values_array.push(get_l_diagonals the_grid)
+
+print values_array
+
