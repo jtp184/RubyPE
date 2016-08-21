@@ -28,7 +28,7 @@ full_number = "08022297381500400075040507785212507791084949994017811857608717409
 
 $colortable = Array.new(20) { Array.new(20) }
 
-def construct_grid(width, height, number)
+def construct_grid(dimensions, number)
 	# row, column
 
 	str_length = number.length
@@ -43,7 +43,7 @@ def construct_grid(width, height, number)
 		char_string = number[start_point,2]
 		subarray << char_string.to_i
 		# puts char_string
-		if subarray.length == 20
+		if subarray.length == dimensions
 			grid << subarray
 			subarray = []
 		end
@@ -174,22 +174,88 @@ def get_l_diagonals(grid)
 
 end
 
+def diagonal_from_number(grid, x, y)
+	length = grid.length
+	width = grid[0].length
+
+	number = grid[x][y]
+
+	max_nw = [x-4, y-4]
+	max_ne = [x-4, y+4]
+	max_sw = [x+4, y+4]
+	max_se = [x+4, y-4]
+
+	# print max_nw
+	# print max_ne
+	# print max_sw
+	# print max_se
+
+	i = x
+	j = y
+	product = 1
+	largest = 0
+
+
+	while i > max_nw[0] and j > max_nw[1]
+
+		$colortable[i][j] = true
+
+		product *= grid[i][j]
+
+		i -= 1
+		j -= 1
+	end
+
+	if product > largest
+		largest = product
+	end
+
+	i = x
+	j = y
+	product = 1
+
+	puts i
+	puts j
+
+	puts max_ne[0]
+	puts max_ne[1]
+
+	while i < max_ne[0] and j > max_ne[1]
+		$colortable[i][j] = true
+		product *= grid[i][j]
+
+		i -= 1
+		j += 1
+	end
+
+	if product > largest
+		largest = product
+	end
+
+	i = x
+	j = y
+	product = 1
+
+end
+
 def get_r_diagonals(grid)
-	index = grid.length-1
+	i = grid.length-1
+	j = 0
 
 	staging_array = []
 
-	while index >= 0
+	while i >= 0
 		# print "#{grid[index][index]} "
-		staging_array << grid[index][index]
-		$colortable[index][index] = true
-		index-=1
+		staging_array << grid[i][j]
+		$colortable[i][j] = true
+		i-=1
+		j+=1
 	end
 
 	return parse_array staging_array
 end
 
-the_grid = construct_grid 20, 20, full_number
+the_grid = construct_grid 20, full_number
 
 $colortable.each_with_index do |subarray, i|
 	subarray.each_with_index do |value, j|
@@ -199,8 +265,8 @@ $colortable.each_with_index do |subarray, i|
 	end
 end
 
-get_r_diagonals the_grid
+# get_r_diagonals the_grid
 
-puts
+diagonal_from_number the_grid, 10, 10
 pretty_print the_grid, $colortable
 
