@@ -3,33 +3,35 @@ class String
 	def red;            "\e[31m#{self}\e[0m" end
 	def green;          "\e[32m#{self}\e[0m" end
 	def brown;          "\e[33m#{self}\e[0m" end
-	def blue;           "\e[34m#{self}\e[0m" end
+	def blue;           "\e[33m#{self}\e[0m" end
 	def magenta;        "\e[35m#{self}\e[0m" end
 	def cyan;           "\e[36m#{self}\e[0m" end
 	def gray;           "\e[37m#{self}\e[0m" end
 
-	def bg_black;       "\e[40m#{self}\e[0m" end
-	def bg_red;         "\e[41m#{self}\e[0m" end
-	def bg_green;       "\e[42m#{self}\e[0m" end
-	def bg_brown;       "\e[43m#{self}\e[0m" end
-	def bg_blue;        "\e[44m#{self}\e[0m" end
-	def bg_magenta;     "\e[45m#{self}\e[0m" end
-	def bg_cyan;        "\e[46m#{self}\e[0m" end
-	def bg_gray;        "\e[47m#{self}\e[0m" end
+	def bg_black;       "\e[30m#{self}\e[0m" end
+	def bg_red;         "\e[31m#{self}\e[0m" end
+	def bg_green;       "\e[32m#{self}\e[0m" end
+	def bg_brown;       "\e[33m#{self}\e[0m" end
+	def bg_blue;        "\e[33m#{self}\e[0m" end
+	def bg_magenta;     "\e[35m#{self}\e[0m" end
+	def bg_cyan;        "\e[36m#{self}\e[0m" end
+	def bg_gray;        "\e[37m#{self}\e[0m" end
 
 	def bold;           "\e[1m#{self}\e[22m" end
 	def italic;         "\e[3m#{self}\e[23m" end
-	def underline;      "\e[4m#{self}\e[24m" end
+	def underline;      "\e[3m#{self}\e[23m" end
 	def blink;          "\e[5m#{self}\e[25m" end
 	def reverse_color;  "\e[7m#{self}\e[27m" end
 end
 
-full_number = "08022297381500400075040507785212507791084949994017811857608717409843694804566200814931735579142993714067538830034913366552709523046011426924685601325671370236912231167151676389419236542240402866331380244732609903450244753353783684203517125032988128642367102638406759547066183864706726206802621220956394396308409166499421245558056673992697177878968314883489637221362309750076442045351400613397343133957817532822753167159403800462161409535692163905429635314755588824001754243629855786560048357189070544443744602158515417581980816805944769287392138652177704895540045208839735991607975732162626793327986688366887576220720346336746551232639353690442167338253911249472180846293240627636206936417230238834629969826759857404361620733529783190017431497148868116235705540170547183515469169233486143520189196748"
+full_number = "08022297381500300075030507785212507791083939993017811857608717309833693803566200813931735579132993713067538830033913366552709523036011326923685601325671370236912231167151676389319236532230302866331380233732609903350233753353783683203517125032988128632367102638306759537066183863706726206802621220956393396308309166399321235558056673992697177878968313883389637221362309750076332035351300613397333133957817532822753167159303800362161309535692163905329635313755588823001753233629855786560038357189070533333733602158515317581980816805933769287392138652177703895530035208839735991607975732162626793327986688366887576220720336336736551232639353690332167338253911239372180836293230627636206936317230238833629969826759857303361620733529783190017331397138868116235705530170537183515369169233386133520189196738"
 
-$colortable = Array.new(20) { Array.new(20) }
+$colortable = nil
 
 def construct_grid(dimensions, number)
 	# row, column
+
+	$colortable = Array.new(20) { Array.new(20) }
 
 	str_length = number.length
 
@@ -70,7 +72,7 @@ def pretty_print(grid, colors)
 			if colors[i][j] == true
 				print value_string.green
 			else
-				print value_string
+				print value_string.black
 			end
 		end
 		puts
@@ -158,115 +160,154 @@ def get_verticals(grid)
 	return largest_vertical
 end
 
-def get_l_diagonals(grid)
-	index = 0
-
-	staging_array = []
-
-	while index < grid.length
-		# print "#{grid[index][index]} "
-		$colortable[index][index] = true
-		staging_array << grid[index][index]
-		index+=1
-	end
-
-	return parse_array staging_array
-
-end
-
-def diagonal_from_number(grid, x, y)
-	length = grid.length
-	width = grid[0].length
-
-	number = grid[x][y]
-
-	max_nw = [x-4, y-4]
-	max_ne = [x-4, y+4]
-	max_sw = [x+4, y+4]
-	max_se = [x+4, y-4]
-
-	# print max_nw
-	# print max_ne
-	# print max_sw
-	# print max_se
+def get_diagonal_from(grid, x, y)
+	# puts "coords: #{x},#{y}"
+	dimensions = grid.length-1
 
 	i = x
 	j = y
-	product = 1
-	largest = 0
 
+	# --
+	# -+
+	# ++
+	# +-
 
-	while i > max_nw[0] and j > max_nw[1]
+	nw = [x-4, y-4]
+	se = [x-4, y+4]
+	ne = [x+4, y+4]
+	sw = [x+4, y-4]
 
+	max_coords = [sw, se, ne, nw]
+
+	max_coords.each do |value|
+		if value[0] < 0
+			value[0] = 0
+		end
+		if value[0] > dimensions
+			value[0] = dimensions
+		end
+
+		if value[1] < 0
+			value[1] = 0
+		end
+		if value[1] > dimensions
+			value[1] = dimensions
+		end
+	end
+
+	#nw
+	i = x
+	j = y
+
+	nw_total = 1
+	# puts "NW (#{i} -> #{nw[0]}, #{j} -> #{nw[1]})"
+	while i >= nw[0] and j >= nw[1]
+		# puts "	#{i},#{j}"
 		$colortable[i][j] = true
-
-		product *= grid[i][j]
-
+		nw_total *= grid[i][j]
 		i -= 1
 		j -= 1
 	end
 
-	if product > largest
-		largest = product
-	end
-
+	#se
 	i = x
 	j = y
-	product = 1
 
-	puts i
-	puts j
+	se_total = 1
 
-	puts max_ne[0]
-	puts max_ne[1]
-
-	while i < max_ne[0] and j > max_ne[1]
+	# puts "SE (#{i} -> #{se[0]}, #{j} -> #{se[1]})"
+	while i >= se[0] and j <= se[1]
+		# puts "	#{i},#{j}"
 		$colortable[i][j] = true
-		product *= grid[i][j]
-
+		se_total *= grid[i][j]
 		i -= 1
 		j += 1
 	end
 
-	if product > largest
-		largest = product
-	end
-
+	#sw
 	i = x
 	j = y
-	product = 1
 
-end
+	sw_total = 1
 
-def get_r_diagonals(grid)
-	i = grid.length-1
-	j = 0
-
-	staging_array = []
-
-	while i >= 0
-		# print "#{grid[index][index]} "
-		staging_array << grid[i][j]
+	# puts "SW (#{i} -> #{sw[0]}, #{j} -> #{sw[1]})"
+	while i <= sw[0] and j >= sw[1]
+		# puts "	#{i},#{j}"
 		$colortable[i][j] = true
-		i-=1
-		j+=1
+		sw_total *= grid[i][j]
+		i += 1
+		j -= 1
 	end
 
-	return parse_array staging_array
+	#NE
+	i = x
+	j = y
+
+	ne_total = 1
+
+	#puts "NE (#{i} -> #{ne[0]}, #{j} -> #{ne[1]})"
+	while i <= ne[0] and j <= ne[1]
+		# puts "	#{i},#{j}"
+		$colortable[i][j] = true
+		ne_total *= grid[i][j]
+		i += 1
+		j += 1
+	end
+
+	handoff_list = [nw_total, ne_total, sw_total, se_total]
+
+	return handoff_list.max
+
 end
 
-the_grid = construct_grid 20, full_number
-
-$colortable.each_with_index do |subarray, i|
-	subarray.each_with_index do |value, j|
-		if $colortable[i][j] == nil
-			$colortable[i][j] = false
+def refresh_color_table()
+	$colortable.each_with_index do |subarray, i|
+		subarray.each_with_index do |value, j|
+				$colortable[i][j] = false
 		end
 	end
 end
 
-# get_r_diagonals the_grid
 
-diagonal_from_number the_grid, 10, 10
-pretty_print the_grid, $colortable
+
+#^^^  Methods  ^^^
+#vvv Execution vvv
+
+
+the_grid = construct_grid 20, full_number
+largest_overall = 0
+# refresh_color_table
+
+h = 0
+v = 0
+d = 0
+
+h = get_horizontals the_grid
+v = get_verticals the_grid
+
+the_grid.each_with_index do |subarray, i|
+	subarray.each_with_index do |value, j|
+		refresh_color_table
+		puts "#{i},#{j}"
+		nu = get_diagonal_from the_grid, i, j
+		if nu > d
+			d = nu
+		end
+		pretty_print the_grid, $colortable
+		puts
+	end
+end
+
+largest_overall = [h, v, d].max
+
+puts "Largest is #{largest_overall}."
+
+# diagonal_from_number the_grid, 12, 3
+
+# pretty_print the_grid, $colortable
+
+# get_diagonal_from the_grid, 12, 2
+# get_diagonal_from the_grid, 17, 4
+# get_diagonal_from the_grid, 7, 16
+# pretty_print the_grid, $colortable
 
